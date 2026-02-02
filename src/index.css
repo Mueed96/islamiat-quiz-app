@@ -2,23 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar for webkit browsers */
+/* Custom scrollbar for webkit browsers - Dark theme */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: rgba(30, 41, 59, 0.5);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgba(100, 116, 139, 0.5);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Global scrollbar dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e1e2e;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a3e;
 }
 
 /* Smooth scrolling */
@@ -26,11 +45,81 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Base body styles */
+/* Base body styles - Premium Dark theme */
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #0a0a0f;
+}
+
+/* Selection colors */
+::selection {
+  background-color: rgba(168, 85, 247, 0.3);
+  color: #ffffff;
+}
+
+/* Floating animation for orbs */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  25% {
+    transform: translateY(-20px) translateX(10px);
+  }
+
+  50% {
+    transform: translateY(-10px) translateX(-5px);
+  }
+
+  75% {
+    transform: translateY(-25px) translateX(5px);
+  }
+}
+
+@keyframes float-delayed {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  25% {
+    transform: translateY(-15px) translateX(-10px);
+  }
+
+  50% {
+    transform: translateY(-25px) translateX(5px);
+  }
+
+  75% {
+    transform: translateY(-10px) translateX(-5px);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 10s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+/* Glow effects */
+.glow-purple {
+  box-shadow: 0 0 40px rgba(168, 85, 247, 0.3), 0 0 80px rgba(168, 85, 247, 0.1);
+}
+
+.glow-pink {
+  box-shadow: 0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(236, 72, 153, 0.1);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.3), 0 0 80px rgba(16, 185, 129, 0.1);
 }
 
 /* Disable hover effects on touch devices to prevent "stuck" hover states */
@@ -42,8 +131,8 @@ body {
 
   /* Re-apply proper states for Quick Mock options on touch devices */
   .quick-mock-option:hover {
-    background-color: white;
-    border-color: #e2e8f0;
+    background-color: transparent;
+    border-color: #334155;
   }
 }
 
@@ -51,5 +140,106 @@ body {
 @media (pointer: coarse) {
   button {
     -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Glass effect utility */
+.glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Premium card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+}
+
+/* Gradient text animation */
+@keyframes gradient-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Reverse floating animation for variety */
+@keyframes floatReverse {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  25% {
+    transform: translateY(15px) translateX(-15px);
+  }
+
+  50% {
+    transform: translateY(5px) translateX(10px);
+  }
+
+  75% {
+    transform: translateY(20px) translateX(-5px);
+  }
+}
+
+/* Horizontal drift animation */
+@keyframes drift {
+
+  0%,
+  100% {
+    transform: translateX(0) translateY(0);
+  }
+
+  33% {
+    transform: translateX(-30px) translateY(10px);
+  }
+
+  66% {
+    transform: translateX(20px) translateY(-15px);
+  }
+}
+
+/* Twinkling stars effect */
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+}
+
+/* Pulse animation for glow effect */
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+
+  50% {
+    opacity: 0.25;
   }
 }
