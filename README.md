@@ -9,9 +9,10 @@ A comprehensive MCQs quiz application for Islamiat final exam preparation, built
 ## Features
 
 - **169 MCQs** covering all important Islamiat topics
-- **Two Study Modes:**
+- **Three Study Modes:**
   - **Complete Series** - Practice all questions in order (1 mark each)
   - **Mock Exam** - 80 random questions (0.5 marks each, 40 total)
+  - **Quick Mock** - Instant feedback mode with auto-progression (0.5 marks each, 40 total)
 - **Progress Tracking** - Visual progress bar and question counter
 - **Instant Results** - Score breakdown with correct/incorrect count
 - **Answer Review** - Review all answers with correct solutions highlighted

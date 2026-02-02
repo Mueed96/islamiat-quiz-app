@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     ArrowRight,
     ArrowLeft,
@@ -12,7 +12,8 @@ import {
     List,
     Target,
     X,
-    ChevronRight
+    ChevronRight,
+    Zap
 } from 'lucide-react';
 import { allQuestions } from './data/questions';
 
@@ -31,6 +32,8 @@ const QuizApp = () => {
     const [userAnswers, setUserAnswers] = useState({});
     const [score, setScore] = useState(0);
     const [showReview, setShowReview] = useState(false);
+    const [showFeedback, setShowFeedback] = useState(false);
+    const [selectedOption, setSelectedOption] = useState(null);
 
     const handleStartFull = () => {
         setQuizMode('full');
@@ -52,6 +55,56 @@ const QuizApp = () => {
         setUserAnswers({});
         setScore(0);
         setShowReview(false);
+        setShowFeedback(false);
+        setSelectedOption(null);
+    };
+
+    const handleStartQuickMock = () => {
+        const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 80);
+        setQuizMode('quickMock');
+        setActiveQuestions(selected);
+        setGameState('playing');
+        setCurrentQuestionIndex(0);
+        setUserAnswers({});
+        setScore(0);
+        setShowReview(false);
+        setShowFeedback(false);
+        setSelectedOption(null);
+    };
+
+    const handleQuickMockSelect = (option) => {
+        if (showFeedback) return; // Prevent multiple clicks
+
+        const isCorrect = option === activeQuestions[currentQuestionIndex].a;
+        setSelectedOption(option);
+        setShowFeedback(true);
+        setUserAnswers(prev => ({
+            ...prev,
+            [currentQuestionIndex]: option
+        }));
+
+        // Auto-advance after 1.5 seconds
+        setTimeout(() => {
+            if (currentQuestionIndex < activeQuestions.length - 1) {
+                setCurrentQuestionIndex(prev => prev + 1);
+                setShowFeedback(false);
+                setSelectedOption(null);
+            } else {
+                // Last question - calculate score and show results
+                let rawScore = 0;
+                const updatedAnswers = { ...userAnswers, [currentQuestionIndex]: option };
+                activeQuestions.forEach((q, index) => {
+                    if (updatedAnswers[index] === q.a) {
+                        rawScore++;
+                    }
+                });
+                setScore(rawScore * 0.5);
+                setGameState('results');
+                setShowFeedback(false);
+                setSelectedOption(null);
+            }
+        }, 1500);
     };
 
     const handleOptionSelect = (option) => {
@@ -158,8 +211,8 @@ const QuizApp = () => {
                             </p>
                         </div>
 
-                        {/* Mode Cards - Side by Side */}
-                        <div className="grid md:grid-cols-2 gap-5 max-w-3xl mx-auto">
+                        {/* Mode Cards - Three Columns */}
+                        <div className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto">
                             {/* Complete Series Card */}
                             <button
                                 onClick={handleStartFull}
@@ -197,6 +250,25 @@ const QuizApp = () => {
                                     <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded">40 total marks</span>
                                 </div>
                             </button>
+
+                            {/* Quick Mock Card */}
+                            <button
+                                onClick={handleStartQuickMock}
+                                className="group bg-gradient-to-br from-teal-600 to-emerald-700 hover:from-teal-700 hover:to-emerald-800 p-6 rounded-xl text-left transition-all duration-200 hover:shadow-xl hover:shadow-emerald-500/30"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="p-3 bg-white/20 rounded-lg group-hover:bg-white/30 transition-colors">
+                                        <Zap className="w-5 h-5 text-emerald-200" />
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-white/50 group-hover:text-emerald-200 group-hover:translate-x-1 transition-all" />
+                                </div>
+                                <h3 className="font-bold text-white mb-1">Quick Mock</h3>
+                                <p className="text-emerald-100 text-sm mb-3">Instant feedback, auto-advance</p>
+                                <div className="flex items-center gap-4 text-xs">
+                                    <span className="px-2 py-1 bg-white/10 text-emerald-100 rounded">0.5 marks each</span>
+                                    <span className="px-2 py-1 bg-emerald-400/20 text-emerald-200 rounded">40 total marks</span>
+                                </div>
+                            </button>
                         </div>
 
                         {/* Quick Stats */}
@@ -228,7 +300,7 @@ const QuizApp = () => {
     if (gameState === 'results') {
         const totalQuestions = activeQuestions.length;
         const correctCount = activeQuestions.filter((q, i) => userAnswers[i] === q.a).length;
-        const maxScore = quizMode === 'random' ? 40 : totalQuestions;
+        const maxScore = (quizMode === 'random' || quizMode === 'quickMock') ? 40 : totalQuestions;
         const percentage = Math.round((score / maxScore) * 100);
 
         return (
@@ -240,7 +312,9 @@ const QuizApp = () => {
                             <Award className="w-6 h-6 text-emerald-600" />
                             <h1 className="font-bold text-slate-900">Performance Report</h1>
                         </div>
-                        <span className="text-sm text-slate-500">{quizMode === 'random' ? 'Mock Exam' : 'Complete Series'}</span>
+                        <span className="text-sm text-slate-500">
+                            {quizMode === 'random' ? 'Mock Exam' : quizMode === 'quickMock' ? 'Quick Mock' : 'Complete Series'}
+                        </span>
                     </div>
                 </header>
 
@@ -383,8 +457,8 @@ const QuizApp = () => {
                         </button>
                         <div className="h-5 w-px bg-slate-200"></div>
                         <div>
-                            <span className="text-xs font-medium text-emerald-600 uppercase tracking-wide">
-                                {quizMode === 'random' ? 'Mock Exam' : 'Full Series'}
+                            <span className="text-xs font-medium uppercase tracking-wide text-emerald-600">
+                                {quizMode === 'random' ? 'Mock Exam' : quizMode === 'quickMock' ? 'Quick Mock' : 'Full Series'}
                             </span>
                         </div>
                     </div>
@@ -431,77 +505,133 @@ const QuizApp = () => {
                                 {currentQuestion.options.map((option, idx) => {
                                     const isSelected = userAnswers[currentQuestionIndex] === option;
                                     const optionLabels = ['A', 'B', 'C', 'D'];
+                                    const isQuickMock = quizMode === 'quickMock';
+                                    const correctAnswer = currentQuestion.a;
+                                    const isCorrectOption = option === correctAnswer;
+                                    const wasSelectedInQuickMock = selectedOption === option;
+                                    const wasCorrectSelection = selectedOption === correctAnswer;
+
+                                    // Determine styling for Quick Mock mode with feedback
+                                    let buttonClass = '';
+                                    let labelClass = '';
+                                    let textClass = '';
+
+                                    if (isQuickMock && showFeedback) {
+                                        // Feedback is showing
+                                        if (isCorrectOption) {
+                                            // This is the correct answer - always show green
+                                            buttonClass = 'border-emerald-500 bg-emerald-100';
+                                            labelClass = 'bg-emerald-500 text-white';
+                                            textClass = 'text-emerald-900 font-medium';
+                                        } else if (wasSelectedInQuickMock && !wasCorrectSelection) {
+                                            // User selected this wrong answer
+                                            buttonClass = 'border-red-500 bg-red-100';
+                                            labelClass = 'bg-red-500 text-white';
+                                            textClass = 'text-red-900 font-medium';
+                                        } else {
+                                            // Other unselected options
+                                            buttonClass = 'border-slate-200 bg-white opacity-50';
+                                            labelClass = 'bg-slate-100 text-slate-500';
+                                            textClass = 'text-slate-600';
+                                        }
+                                    } else if (isQuickMock) {
+                                        // Quick Mock but no feedback yet
+                                        buttonClass = 'border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50';
+                                        labelClass = 'bg-slate-100 text-slate-500';
+                                        textClass = 'text-slate-600';
+                                    } else {
+                                        // Regular mode (full/random)
+                                        buttonClass = isSelected
+                                            ? 'border-emerald-500 bg-emerald-50'
+                                            : 'border-slate-200 bg-white hover:border-emerald-200 hover:bg-slate-50';
+                                        labelClass = isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500';
+                                        textClass = isSelected ? 'text-emerald-900 font-medium' : 'text-slate-600';
+                                    }
+
                                     return (
                                         <button
                                             key={idx}
-                                            onClick={() => handleOptionSelect(option)}
-                                            className={`text-left p-4 rounded-lg border-2 transition-all duration-150 flex items-start gap-3
-                                                ${isSelected
-                                                    ? 'border-emerald-500 bg-emerald-50'
-                                                    : 'border-slate-200 bg-white hover:border-emerald-200 hover:bg-slate-50'
-                                                }
-                                            `}
+                                            onClick={() => isQuickMock ? handleQuickMockSelect(option) : handleOptionSelect(option)}
+                                            disabled={isQuickMock && showFeedback}
+                                            className={`text-left p-4 rounded-lg border-2 transition-all duration-150 flex items-start gap-3 ${buttonClass} ${isQuickMock && showFeedback ? 'cursor-default' : ''}`}
                                         >
-                                            <span className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs font-bold
-                                                ${isSelected ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'}
-                                            `}>
+                                            <span className={`shrink-0 w-6 h-6 rounded flex items-center justify-center text-xs font-bold ${labelClass}`}>
                                                 {optionLabels[idx]}
                                             </span>
-                                            <span className={`text-sm ${isSelected ? 'text-emerald-900 font-medium' : 'text-slate-600'}`}>
+                                            <span className={`text-sm ${textClass}`}>
                                                 {option}
                                             </span>
+                                            {isQuickMock && showFeedback && isCorrectOption && (
+                                                <CheckCircle className="w-5 h-5 text-emerald-500 ml-auto shrink-0" />
+                                            )}
+                                            {isQuickMock && showFeedback && wasSelectedInQuickMock && !wasCorrectSelection && (
+                                                <XCircle className="w-5 h-5 text-red-500 ml-auto shrink-0" />
+                                            )}
                                         </button>
                                     );
                                 })}
                             </div>
                         </div>
 
-                        {/* Navigation */}
-                        <div className="px-5 py-4 bg-white border-t border-slate-100 flex justify-between items-center">
-                            <button
-                                onClick={handleBack}
-                                disabled={currentQuestionIndex === 0}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                                    ${currentQuestionIndex === 0
-                                        ? 'text-slate-300 cursor-not-allowed'
-                                        : 'text-slate-600 hover:bg-slate-100'
-                                    }
-                                `}
-                            >
-                                <ArrowLeft className="w-4 h-4" />
-                                Previous
-                            </button>
+                        {/* Navigation - Hidden for Quick Mock */}
+                        {quizMode !== 'quickMock' && (
+                            <div className="px-5 py-4 bg-white border-t border-slate-100 flex justify-between items-center">
+                                <button
+                                    onClick={handleBack}
+                                    disabled={currentQuestionIndex === 0}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                                        ${currentQuestionIndex === 0
+                                            ? 'text-slate-300 cursor-not-allowed'
+                                            : 'text-slate-600 hover:bg-slate-100'
+                                        }
+                                    `}
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    Previous
+                                </button>
 
-                            {currentQuestionIndex === activeQuestions.length - 1 ? (
-                                <button
-                                    onClick={handleFinish}
-                                    disabled={!isOptionSelected}
-                                    className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all
-                                        ${!isOptionSelected
-                                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                            : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
-                                        }
-                                    `}
-                                >
-                                    Finish Exam
-                                    <Award className="w-4 h-4" />
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={handleNext}
-                                    disabled={!isOptionSelected}
-                                    className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all
-                                        ${!isOptionSelected
-                                            ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                                            : 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
-                                        }
-                                    `}
-                                >
-                                    Next
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
-                            )}
-                        </div>
+                                {currentQuestionIndex === activeQuestions.length - 1 ? (
+                                    <button
+                                        onClick={handleFinish}
+                                        disabled={!isOptionSelected}
+                                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all
+                                            ${!isOptionSelected
+                                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
+                                            }
+                                        `}
+                                    >
+                                        Finish Exam
+                                        <Award className="w-4 h-4" />
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={handleNext}
+                                        disabled={!isOptionSelected}
+                                        className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all
+                                            ${!isOptionSelected
+                                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                                : 'bg-slate-900 hover:bg-slate-800 text-white shadow-sm'
+                                            }
+                                        `}
+                                    >
+                                        Next
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Quick Mock Progress Indicator */}
+                        {quizMode === 'quickMock' && showFeedback && (
+                            <div className="px-5 py-3 bg-emerald-50 border-t border-emerald-100 text-center">
+                                <span className="text-sm text-emerald-600 font-medium">
+                                    {currentQuestionIndex < activeQuestions.length - 1
+                                        ? 'Moving to next question...'
+                                        : 'Calculating your score...'}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>
