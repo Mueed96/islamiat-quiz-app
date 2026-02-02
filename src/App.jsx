@@ -34,6 +34,7 @@ const QuizApp = () => {
     const [showReview, setShowReview] = useState(false);
     const [showFeedback, setShowFeedback] = useState(false);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [shuffledOptions, setShuffledOptions] = useState([]);
 
     const handleStartFull = () => {
         setQuizMode('full');
@@ -62,6 +63,8 @@ const QuizApp = () => {
     const handleStartQuickMock = () => {
         const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
         const selected = shuffled.slice(0, 80);
+        // Shuffle options for the first question
+        const firstQuestionShuffledOptions = [...selected[0].options].sort(() => 0.5 - Math.random());
         setQuizMode('quickMock');
         setActiveQuestions(selected);
         setGameState('playing');
@@ -71,6 +74,7 @@ const QuizApp = () => {
         setShowReview(false);
         setShowFeedback(false);
         setSelectedOption(null);
+        setShuffledOptions(firstQuestionShuffledOptions);
     };
 
     const handleQuickMockSelect = (option) => {
@@ -87,9 +91,13 @@ const QuizApp = () => {
         // Auto-advance after 1.5 seconds
         setTimeout(() => {
             if (currentQuestionIndex < activeQuestions.length - 1) {
-                setCurrentQuestionIndex(prev => prev + 1);
+                const nextIndex = currentQuestionIndex + 1;
+                // Shuffle options for the next question
+                const nextQuestionShuffledOptions = [...activeQuestions[nextIndex].options].sort(() => 0.5 - Math.random());
+                setCurrentQuestionIndex(nextIndex);
                 setShowFeedback(false);
                 setSelectedOption(null);
+                setShuffledOptions(nextQuestionShuffledOptions);
             } else {
                 // Last question - calculate score and show results
                 let rawScore = 0;
@@ -502,7 +510,7 @@ const QuizApp = () => {
                         {/* Options - 2x2 Grid on Desktop */}
                         <div className="p-5 bg-slate-50">
                             <div className="grid md:grid-cols-2 gap-3">
-                                {currentQuestion.options.map((option, idx) => {
+                                {(quizMode === 'quickMock' ? shuffledOptions : currentQuestion.options).map((option, idx) => {
                                     const isSelected = userAnswers[currentQuestionIndex] === option;
                                     const optionLabels = ['A', 'B', 'C', 'D'];
                                     const isQuickMock = quizMode === 'quickMock';

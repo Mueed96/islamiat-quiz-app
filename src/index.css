@@ -32,3 +32,24 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Disable hover effects on touch devices to prevent "stuck" hover states */
+@media (hover: none) {
+  button:hover {
+    background-color: inherit;
+    border-color: inherit;
+  }
+
+  /* Re-apply proper states for Quick Mock options on touch devices */
+  .quick-mock-option:hover {
+    background-color: white;
+    border-color: #e2e8f0;
+  }
+}
+
+/* Alternative: Use touch-action for better mobile experience */
+@media (pointer: coarse) {
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
