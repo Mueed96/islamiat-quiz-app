@@ -13,7 +13,8 @@ import {
     Target,
     X,
     ChevronRight,
-    Zap
+    Zap,
+    Calendar
 } from 'lucide-react';
 import { allQuestions } from './data/questions';
 
@@ -81,6 +82,64 @@ const QuizApp = () => {
         setShowFeedback(false);
         setSelectedOption(null);
         setShuffledOptions(firstQuestionShuffledOptions);
+    };
+
+    // Filter questions that contain dates (years, AH dates, CE dates, historical periods)
+    const getDateQuestions = () => {
+        // Pattern matches: years, AH dates, CE/AD/BC dates, numbers, counts, ages, percentages
+        const datePatterns = [
+            /\b\d{3,4}\s*(A\.?H\.?|AH|CE|AD|BC)?\b/i,           // Years like 619, 622 CE, 2 A.H.
+            /\b\d{1,2}\s*(A\.?H\\.?|AH)\b/i,                     // Short AH dates like 2 A.H., 6 AH
+            /\b\d{1,2}(st|nd|rd|th)\s*(year|century|Hijrah)/i,  // Ordinal dates like "10th year"
+            /\b(year|years)\s*of\s*(Hijrah|Prophethood|Grief|Migration)/i, // "Year of Grief"
+            /\bHijrah\b/i,                                       // Migration reference
+            /\b(Fasting|Hajj|Zakat|Azaan).*made\s*obligatory/i, // Religious obligations with dates
+            /\bwhen\s*(was|did).*occur/i,                       // "When did X occur" questions
+            /\bin\s*which\s*year/i,                             // "In which year" questions
+            /\bhow\s*many\s*(days|years|prophets|people|Muslims|Surah|types|heads|conditions|essential|beliefs)/i, // "How many" questions
+            /\b\d+\s*(marks?|total|%|percent)/i,                // Numbers with marks/percentage
+            /\b\d+\s*(times?|reward)/i,                         // "27 times more reward"
+            /\bage\s*of\s*\d+/i,                                 // Ages like "age of 65"
+            /\b\d+\s*(commandments|categories|types|Surahs?)/i, // Counts of things
+            /\bnumber\s*of\s*(heads|categories|prophets)/i,     // "Number of X"
+            /\bThere\s*are\s*\d+/i,                              // "There are X types"
+            /\b\d+\.?\d*\s*%/i,                                  // Percentages like "2.5%"
+        ];
+
+        const isDateQuestion = (q) => {
+            const textToCheck = q.q + ' ' + q.options.join(' ') + ' ' + q.a;
+            return datePatterns.some(pattern => pattern.test(textToCheck));
+        };
+
+        // Get unique questions using question text as key
+        const seenQuestions = new Set();
+        const uniqueDateQuestions = allQuestions.filter(q => {
+            if (seenQuestions.has(q.q)) return false;
+            if (!isDateQuestion(q)) return false;
+            seenQuestions.add(q.q);
+            return true;
+        });
+
+        return uniqueDateQuestions;
+    };
+
+    const handleStartDatesQuiz = () => {
+        const dateQuestions = getDateQuestions();
+        // Shuffle using Fisher-Yates for better randomization
+        const shuffled = [...dateQuestions];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        setQuizMode('dates');
+        setActiveQuestions(shuffled);
+        setGameState('playing');
+        setCurrentQuestionIndex(0);
+        setUserAnswers({});
+        setScore(0);
+        setShowReview(false);
+        setShowFeedback(false);
+        setSelectedOption(null);
     };
 
     const handleQuickMockSelect = (option) => {
@@ -281,7 +340,7 @@ const QuizApp = () => {
                         </div>
 
                         {/* Mode Cards - Row Layout */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto mb-12">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-7xl mx-auto mb-12">
                             {/* Complete Series Card */}
                             <button
                                 onClick={handleStartFull}
@@ -359,6 +418,33 @@ const QuizApp = () => {
                                     <div className="flex items-center gap-3 text-xs mt-auto">
                                         <span className="px-3 py-1.5 bg-white/5 text-slate-400 rounded-lg border border-white/5">0.5 marks</span>
                                         <span className="px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">40 total</span>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* Dates Quiz Card */}
+                            <button
+                                onClick={handleStartDatesQuiz}
+                                className="group relative rounded-3xl transition-transform duration-300 hover:-translate-y-2 h-full"
+                            >
+                                {/* Gradient border effect */}
+                                <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 rounded-3xl opacity-80 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                <div className="absolute -inset-[2px] bg-gradient-to-r from-purple-600 via-fuchsia-500 to-pink-500 rounded-3xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-300"></div>
+                                <div className="relative bg-[#12121a] backdrop-blur-xl p-7 rounded-3xl text-left border border-white/5 group-hover:border-transparent transition-colors h-full flex flex-col">
+                                    <div className="flex items-start justify-between mb-6">
+                                        <div className="relative">
+                                            <div className="absolute -inset-2 bg-purple-500/20 rounded-xl blur-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            <div className="relative p-3.5 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/10 rounded-xl border border-purple-500/20">
+                                                <Calendar className="w-6 h-6 text-purple-400" />
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-purple-400 group-hover:translate-x-1 transition-all" />
+                                    </div>
+                                    <h3 className="font-bold text-white text-xl mb-2">Dates & Numbers</h3>
+                                    <p className="text-slate-500 text-sm mb-5 leading-relaxed flex-grow">Focus on dates, years, and numeric facts</p>
+                                    <div className="flex items-center gap-3 text-xs mt-auto">
+                                        <span className="px-3 py-1.5 bg-white/5 text-slate-400 rounded-lg border border-white/5">1 mark each</span>
+                                        <span className="px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">{getDateQuestions().length} total</span>
                                     </div>
                                 </div>
                             </button>
@@ -597,7 +683,7 @@ const QuizApp = () => {
                         <div className="h-5 w-px bg-white/10"></div>
                         <div>
                             <span className="text-xs font-semibold uppercase tracking-wide bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-400 bg-clip-text text-transparent">
-                                {quizMode === 'random' ? 'Mock Exam' : quizMode === 'quickMock' ? 'Quick Mock' : 'Full Series'}
+                                {quizMode === 'random' ? 'Mock Exam' : quizMode === 'quickMock' ? 'Quick Mock' : quizMode === 'dates' ? 'Dates & Numbers' : 'Full Series'}
                             </span>
                         </div>
                     </div>

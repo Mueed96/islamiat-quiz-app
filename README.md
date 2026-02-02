@@ -1,6 +1,6 @@
 # Islamiat Final Preparation
 
-A comprehensive MCQs quiz application for Islamiat final exam preparation, built with React and Tailwind CSS.
+A comprehensive MCQs quiz application for Islamiat final exam preparation, built with React and Tailwind CSS. Features a premium dark theme with animated backgrounds and multiple study modes.
 
 ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
 ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
@@ -8,22 +8,36 @@ A comprehensive MCQs quiz application for Islamiat final exam preparation, built
 
 ## Features
 
-- **169 MCQs** covering all important Islamiat topics
-- **Three Study Modes:**
-  - **Complete Series** - Practice all questions in order (1 mark each)
-  - **Mock Exam** - 80 random questions (0.5 marks each, 40 total)
-  - **Quick Mock** - Instant feedback mode with auto-progression (0.5 marks each, 40 total)
+### 📚 Study Modes
+
+| Mode | Questions | Marking | Description |
+|------|-----------|---------|-------------|
+| **Complete Series** | 169 | 1 mark each | Practice all questions in sequential order |
+| **Mock Exam** | 80 | 0.5 marks (40 total) | Random questions from the pool |
+| **Quick Mock** | 80 | 0.5 marks (40 total) | Instant feedback with auto-advance |
+| **Dates & Numbers** | Dynamic | 1 mark each | Focus on dates, years, and numeric facts |
+
+### ✨ UI Features
+
+- **Premium Dark Theme** - Modern 2026 SaaS aesthetic with glassmorphism
+- **Animated Background** - Floating orbs with pulse, drift, and twinkle animations
+- **Gradient Borders** - Beautiful purple-fuchsia-pink gradient card borders
+- **Mouse-Follow Glow** - Interactive glow effect that follows cursor
+- **Responsive Design** - Works seamlessly on desktop, tablet, and mobile
+
+### 📊 Quiz Features
+
 - **Progress Tracking** - Visual progress bar and question counter
-- **Instant Results** - Score breakdown with correct/incorrect count
+- **Instant Results** - Score breakdown with correct/incorrect count and percentage
 - **Answer Review** - Review all answers with correct solutions highlighted
-- **Responsive Design** - Works on desktop and mobile devices
+- **Shuffled Options** - Options are randomized for each question
 
 ## Tech Stack
 
 - **React 18** - UI Framework
-- **Vite** - Build Tool
-- **Tailwind CSS** - Styling
-- **Lucide React** - Icons
+- **Vite** - Build Tool & Dev Server
+- **Tailwind CSS** - Utility-first Styling
+- **Lucide React** - Modern Icon Library
 
 ## Getting Started
 
@@ -36,7 +50,7 @@ A comprehensive MCQs quiz application for Islamiat final exam preparation, built
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/islamiat-quiz-app.git
+git clone https://github.com/Mueed96/islamiat-quiz-app.git
 
 # Navigate to project directory
 cd islamiat-quiz-app
@@ -76,14 +90,21 @@ islamiat-quiz-app/
 ├── src/
 │   ├── data/
 │   │   └── questions.js    # All 169 MCQs
-│   ├── App.jsx             # Main quiz component
+│   ├── App.jsx             # Main quiz component with all modes
 │   ├── main.jsx            # React entry point
-│   └── index.css           # Tailwind CSS
+│   └── index.css           # Tailwind CSS + custom animations
 ├── index.html
 ├── package.json
 ├── vite.config.js
 └── tailwind.config.js
 ```
+
+## Screenshots
+
+The app features:
+- Welcome screen with 4 mode selection cards
+- Quiz playing screen with animated background
+- Results screen with detailed review
 
 ## Author
 
